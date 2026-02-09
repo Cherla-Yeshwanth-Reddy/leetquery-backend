@@ -6,6 +6,9 @@
 -- ============================================
 
 -- Drop tables if they exist (for clean restart)
+DROP TABLE IF EXISTS user_roles;
+DROP TABLE IF EXISTS problems;
+DROP TABLE IF EXISTS stages;
 DROP TABLE IF EXISTS enrollments;
 DROP TABLE IF EXISTS courses;
 DROP TABLE IF EXISTS students;
@@ -153,3 +156,56 @@ INSERT INTO enrollments (student_id, course_id, semester, year, grade) VALUES
 (13, 9, 'Fall', 2021, 'B'),
 (14, 8, 'Fall', 2023, 'B+'),
 (15, 7, 'Fall', 2022, 'A-');
+
+-- ============================================
+-- Table: stages (SQL Learning Stages)
+-- ============================================
+CREATE TABLE IF NOT EXISTS stages (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    order_no INT NOT NULL
+);
+
+-- ============================================
+-- Table: problems (SQL Learning Problems)
+-- ============================================
+CREATE TABLE IF NOT EXISTS problems (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    stage_id INT NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    expected_query TEXT NOT NULL,
+    FOREIGN KEY (stage_id) REFERENCES stages(id)
+);
+
+-- ============================================
+-- Sample Data: stages
+-- ============================================
+INSERT INTO stages (title, description, order_no) VALUES
+('SELECT Basics', 'Learn how to retrieve data using SELECT', 1),
+('WHERE Filtering', 'Filter rows using WHERE clause', 2),
+('JOIN Operations', 'Combine tables using JOIN', 3);
+
+-- ============================================
+-- Sample Data: problems
+-- ============================================
+INSERT INTO problems (stage_id, title, description, expected_query) VALUES
+(1, 'List all students', 'Write a query to display all students from the students table.', 'SELECT * FROM students;'),
+(2, 'Students with GPA > 3.5', 'Display students whose GPA is greater than 3.5', 'SELECT * FROM students WHERE gpa > 3.5;'),
+(3, 'Courses with instructors', 'Show course name and instructor name', 'SELECT c.name, i.name FROM courses c JOIN instructors i ON c.instructor_id = i.id;');
+
+-- ============================================
+-- Table: user_roles (Admin Authentication)
+-- ============================================
+CREATE TABLE IF NOT EXISTS user_roles (
+    user_id VARCHAR(255) PRIMARY KEY,
+    role VARCHAR(50) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ============================================
+-- Sample Data: user_roles
+-- ============================================
+-- Add your Supabase user ID here with ADMIN role
+-- Example: INSERT INTO user_roles (user_id, role) VALUES ('your-supabase-user-id', 'ADMIN');
