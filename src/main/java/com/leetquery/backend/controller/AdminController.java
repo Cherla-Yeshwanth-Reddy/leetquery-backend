@@ -2,7 +2,6 @@ package com.leetquery.backend.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,11 +21,11 @@ public class AdminController {
     private final ObjectMapper objectMapper = new ObjectMapper();
     
     @GetMapping("/admin/checkRole")
-    public ResponseEntity<String> checkRole(@RequestHeader("Authorization") String authHeader) {
+    public String checkRole(@RequestHeader("Authorization") String authHeader) {
         try {
             // Extract token from "Bearer <token>"
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-                return ResponseEntity.ok("USER");
+                return "USER";
             }
             
             String token = authHeader.substring(7);
@@ -35,7 +34,7 @@ public class AdminController {
             // JWT format: header.payload.signature
             String[] parts = token.split("\\.");
             if (parts.length < 2) {
-                return ResponseEntity.ok("USER");
+                return "USER";
             }
             
             // Decode the payload (second part)
@@ -46,7 +45,7 @@ public class AdminController {
             String userId = jsonNode.get("sub").asText();
             
             if (userId == null || userId.isEmpty()) {
-                return ResponseEntity.ok("USER");
+                return "USER";
             }
             
             // Query user_roles table
@@ -56,19 +55,19 @@ public class AdminController {
                 String role = jdbcTemplate.queryForObject(sql, String.class, userId);
                 
                 if ("ADMIN".equals(role)) {
-                    return ResponseEntity.ok("ADMIN");
+                    return "ADMIN";
                 } else {
-                    return ResponseEntity.ok("USER");
+                    return "USER";
                 }
                 
             } catch (EmptyResultDataAccessException e) {
                 // No row found for this user
-                return ResponseEntity.ok("USER");
+                return "USER";
             }
             
         } catch (Exception e) {
             // Any error in decoding or parsing
-            return ResponseEntity.ok("USER");
+            return "USER";
         }
     }
 }
