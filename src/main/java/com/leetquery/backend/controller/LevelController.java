@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/levels")
+@RequestMapping("/levels")
 @CrossOrigin(origins = "*")
 @RequiredArgsConstructor
 public class LevelController {
