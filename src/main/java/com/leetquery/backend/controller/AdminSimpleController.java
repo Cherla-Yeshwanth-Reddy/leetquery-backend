@@ -46,39 +46,31 @@ public class AdminSimpleController {
         }
 
         try {
-            // Insert problem and get generated ID
-            KeyHolder keyHolder = new GeneratedKeyHolder();
-            
-            jdbcTemplate.update(connection -> {
-                PreparedStatement ps = connection.prepareStatement(
-                    "INSERT INTO problems (title, description, difficulty) VALUES (?, ?, ?)",
-                    Statement.RETURN_GENERATED_KEYS
-                );
-                ps.setString(1, request.getTitle());
-                ps.setString(2, request.getDescription());
-                ps.setString(3, request.getDifficulty());
-                return ps;
-            }, keyHolder);
+            // Query stage ID by order_no
+            Integer stageId = jdbcTemplate.queryForObject(
+                "SELECT id FROM stages WHERE order_no = ?",
+                Integer.class,
+                request.getStageOrder()
+            );
 
-            int problemId = keyHolder.getKey().intValue();
-
-            // Insert stages
-            if (request.getStages() != null && !request.getStages().isEmpty()) {
-                for (AddProblemRequest.StageRequest stage : request.getStages()) {
-                    jdbcTemplate.update(
-                        "INSERT INTO stages (problem_id, stage_number, question, expected_query) VALUES (?, ?, ?, ?)",
-                        problemId,
-                        stage.getStageNumber(),
-                        stage.getQuestion(),
-                        stage.getExpectedQuery()
-                    );
-                }
+            if (stageId == null) {
+                Map<String, String> error = new HashMap<>();
+                error.put("error", "Stage not found for order_no: " + request.getStageOrder());
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
             }
+
+            // Insert problem
+            jdbcTemplate.update(
+                "INSERT INTO problems (stage_id, title, description, expected_query) VALUES (?, ?, ?, ?)",
+                stageId,
+                request.getTitle(),
+                request.getDescription(),
+                request.getExpectedQuery()
+            );
 
             // Return success response
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
-            response.put("problemId", problemId);
             
             return ResponseEntity.ok(response);
 
