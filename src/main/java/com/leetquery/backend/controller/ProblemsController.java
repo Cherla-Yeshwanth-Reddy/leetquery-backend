@@ -17,37 +17,35 @@ public class ProblemsController {
 
     @GetMapping("/problems")
     public List<StageResponse> getProblems() {
-        List<StageResponse> result = new ArrayList<>();
+        String query = "SELECT s.order_no, s.title AS stage_title, p.id, p.title AS problem_title, p.description " +
+                       "FROM stages s " +
+                       "JOIN problems p ON p.stage_id = s.id " +
+                       "ORDER BY s.order_no";
 
-        // Fetch all stages ordered by order_no
-        String stageQuery = "SELECT id, title, description, order_no FROM stages ORDER BY order_no";
-        List<Map<String, Object>> stages = jdbcTemplate.queryForList(stageQuery);
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList(query);
 
-        for (Map<String, Object> stage : stages) {
-            Integer stageId = (Integer) stage.get("id");
-            Integer orderNo = (Integer) stage.get("order_no");
-            String stageTitle = (String) stage.get("title");
+        // Group problems by stage
+        Map<Integer, StageResponse> stageMap = new LinkedHashMap<>();
 
-            // Fetch problems for this stage
-            String problemQuery = "SELECT title, description, expected_query FROM problems WHERE stage_id = ?";
-            List<Map<String, Object>> problemsData = jdbcTemplate.queryForList(problemQuery, stageId);
+        for (Map<String, Object> row : rows) {
+            Integer stageNumber = (Integer) row.get("order_no");
+            String stageTitle = (String) row.get("stage_title");
+            Integer problemId = (Integer) row.get("id");
+            String problemTitle = (String) row.get("problem_title");
+            String problemDescription = (String) row.get("description");
 
-            // Build problem list
-            List<ProblemResponse> problems = new ArrayList<>();
-            for (Map<String, Object> problemData : problemsData) {
-                ProblemResponse problem = new ProblemResponse(
-                    (String) problemData.get("title"),
-                    (String) problemData.get("description"),
-                    (String) problemData.get("expected_query")
-                );
-                problems.add(problem);
+            // Get or create stage response
+            StageResponse stageResponse = stageMap.get(stageNumber);
+            if (stageResponse == null) {
+                stageResponse = new StageResponse(stageNumber, stageTitle, new ArrayList<>());
+                stageMap.put(stageNumber, stageResponse);
             }
 
-            // Build stage response
-            StageResponse stageResponse = new StageResponse(orderNo, stageTitle, problems);
-            result.add(stageResponse);
+            // Add problem to stage
+            ProblemResponse problem = new ProblemResponse(problemId, problemTitle, problemDescription);
+            stageResponse.getProblems().add(problem);
         }
 
-        return result;
+        return new ArrayList<>(stageMap.values());
     }
 }

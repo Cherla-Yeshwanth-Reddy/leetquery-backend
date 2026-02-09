@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProblemResponse {
+    private int id;
     private String title;
     private String description;
-    private String expectedQuery;
 }
