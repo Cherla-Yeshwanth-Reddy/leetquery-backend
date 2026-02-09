@@ -1,7 +1,7 @@
 package com.leetquery.backend.controller;
 
-import com.leetquery.backend.model.ProblemResponse;
-import com.leetquery.backend.model.StageResponse;
+import com.leetquery.backend.dto.ProblemResponse;
+import com.leetquery.backend.dto.StageResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
@@ -16,36 +16,36 @@ public class ProblemsController {
     private JdbcTemplate jdbcTemplate;
 
     @GetMapping("/problems")
-    public List<StageResponse> getProblems() {
-        String query = "SELECT s.order_no, s.title AS stage_title, p.id, p.title AS problem_title, p.description " +
-                       "FROM stages s " +
-                       "JOIN problems p ON p.stage_id = s.id " +
-                       "ORDER BY s.order_no";
+    public List<StageResponse> getAllStagesWithProblems() {
 
-        List<Map<String, Object>> rows = jdbcTemplate.queryForList(query);
+        List<Map<String, Object>> stages = jdbcTemplate.queryForList(
+            "SELECT id, title, order_no FROM stages ORDER BY order_no"
+        );
 
-        // Group problems by stage
-        Map<Integer, StageResponse> stageMap = new LinkedHashMap<>();
+        List<StageResponse> result = new ArrayList<>();
 
-        for (Map<String, Object> row : rows) {
-            Integer stageNumber = (Integer) row.get("order_no");
-            String stageTitle = (String) row.get("stage_title");
-            Integer problemId = (Integer) row.get("id");
-            String problemTitle = (String) row.get("problem_title");
-            String problemDescription = (String) row.get("description");
+        for (Map<String, Object> stage : stages) {
 
-            // Get or create stage response
-            StageResponse stageResponse = stageMap.get(stageNumber);
-            if (stageResponse == null) {
-                stageResponse = new StageResponse(stageNumber, stageTitle, new ArrayList<>());
-                stageMap.put(stageNumber, stageResponse);
-            }
+            int stageId = (int) stage.get("id");
+            int stageNumber = (int) stage.get("order_no");
+            String stageTitle = (String) stage.get("title");
 
-            // Add problem to stage
-            ProblemResponse problem = new ProblemResponse(problemId, problemTitle, problemDescription);
-            stageResponse.getProblems().add(problem);
+            List<Map<String, Object>> problems = jdbcTemplate.queryForList(
+                "SELECT id, title, description FROM problems WHERE stage_id = ?",
+                stageId
+            );
+
+            List<ProblemResponse> problemList = problems.stream()
+                .map(p -> new ProblemResponse(
+                    (int) p.get("id"),
+                    (String) p.get("title"),
+                    (String) p.get("description")
+                ))
+                .toList();
+
+            result.add(new StageResponse(stageNumber, stageTitle, problemList));
         }
 
-        return new ArrayList<>(stageMap.values());
+        return result;
     }
 }

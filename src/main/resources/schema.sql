@@ -205,6 +205,33 @@ CREATE TABLE IF NOT EXISTS user_roles (
 );
 
 -- ============================================
+-- Table: challenges (Tutorial Mode Challenges)
+-- ============================================
+CREATE TABLE IF NOT EXISTS challenges (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    level_id INT NOT NULL DEFAULT 0,
+    stage_number INT NOT NULL,
+    stage_title VARCHAR(255) NOT NULL,
+    difficulty VARCHAR(20) NOT NULL CHECK (difficulty IN ('EASY', 'MEDIUM', 'HARD')),
+    description TEXT NOT NULL,
+    expected_query TEXT NOT NULL,
+    hint TEXT,
+    relational_algebra_hint TEXT,
+    success_message TEXT NOT NULL,
+    challenge_type VARCHAR(10) DEFAULT 'DQL',
+    UNIQUE(level_id, stage_number, difficulty)
+);
+
+-- ============================================
+-- Table: tutorial_schema (Schema Information)
+-- ============================================
+CREATE TABLE IF NOT EXISTS tutorial_schema (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    level_id INT NOT NULL DEFAULT 0,
+    schema_info TEXT NOT NULL
+);
+
+-- ============================================
 -- Sample Data: user_roles
 -- ============================================
 -- Add your Supabase user ID here with ADMIN role
