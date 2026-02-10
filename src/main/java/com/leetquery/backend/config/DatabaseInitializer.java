@@ -30,8 +30,18 @@ public class DatabaseInitializer implements CommandLineRunner {
             try {
                 jdbcTemplate.execute("SELECT 1 FROM tutorial_schema LIMIT 1");
                 log.info("tutorial_schema table exists");
+                
+                // Also check if we have data for level 0
+                Integer schemaCount = jdbcTemplate.queryForObject(
+                    "SELECT COUNT(*) FROM tutorial_schema WHERE level_id = 0", 
+                    Integer.class
+                );
+                if (schemaCount == null || schemaCount == 0) {
+                    log.info("Seeding tutorial_schema table...");
+                    jdbcTemplate.execute("INSERT INTO tutorial_schema (level_id, schema_info) VALUES (0, 'Student Database Schema:\\n• Student (student_id INT PRIMARY KEY, name VARCHAR(50), age INT CHECK (age > 0), department VARCHAR(20), marks INT DEFAULT 0)')");
+                }
             } catch (Exception e) {
-                log.info("tutorial_schema table missing, creating and seeding...");
+                log.info("tutorial_schema table missing or seeding failed, creating...");
                 jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS tutorial_schema (id INT PRIMARY KEY AUTO_INCREMENT, level_id INT NOT NULL DEFAULT 0, schema_info TEXT NOT NULL)");
                 jdbcTemplate.execute("INSERT INTO tutorial_schema (level_id, schema_info) VALUES (0, 'Student Database Schema:\\n• Student (student_id INT PRIMARY KEY, name VARCHAR(50), age INT CHECK (age > 0), department VARCHAR(20), marks INT DEFAULT 0)')");
                 log.info("tutorial_schema table created and seeded!");
