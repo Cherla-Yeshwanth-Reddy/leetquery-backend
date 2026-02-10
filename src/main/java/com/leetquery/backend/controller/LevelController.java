@@ -3,12 +3,14 @@ package com.leetquery.backend.controller;
 import com.leetquery.backend.model.Challenge;
 import com.leetquery.backend.model.SchemaResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/levels")
 @CrossOrigin(origins = "*")
@@ -46,8 +48,10 @@ public class LevelController {
         try {
             String schemaInfo = jdbcTemplate.queryForObject(sql, new Object[]{levelId}, String.class);
             return new SchemaResponse(schemaInfo != null ? schemaInfo : "No schema available");
-        } catch (org.springframework.dao.EmptyResultDataAccessException e) {
-            return new SchemaResponse("No schema available for level " + levelId);
+        } catch (Exception e) {
+            log.error("Error fetching schema for level {}: {}", levelId, e.getMessage(), e);
+            // Handle table missing or data missing gracefully
+            return new SchemaResponse("Schema information currently unavailable for level " + levelId + ". Error: " + e.getMessage());
         }
     }
     
