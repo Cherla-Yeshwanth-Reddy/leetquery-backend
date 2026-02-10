@@ -32,25 +32,21 @@ public class QueryController {
             
         } catch (SQLException e) {
             log.error("SQL error: {}", e.getMessage());
-            ErrorResponse errorResponse = ErrorResponse.builder()
+            QueryResponse errorResponse = QueryResponse.builder()
                     .success(false)
-                    .error(e.getMessage())
-                    .sqlState(e.getSQLState())
-                    .errorCode(e.getErrorCode())
                     .queryType("ERROR")
+                    .message(e.getMessage())
                     .build();
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+            return ResponseEntity.ok(errorResponse);
             
         } catch (Exception e) {
             log.error("Unexpected error: {}", e.getMessage(), e);
-            ErrorResponse errorResponse = ErrorResponse.builder()
+            QueryResponse errorResponse = QueryResponse.builder()
                     .success(false)
-                    .error("Internal server error: " + e.getMessage())
-                    .sqlState(null)
-                    .errorCode(null)
                     .queryType("ERROR")
+                    .message("Internal server error: " + e.getMessage())
                     .build();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+            return ResponseEntity.ok(errorResponse);
         }
     }
 

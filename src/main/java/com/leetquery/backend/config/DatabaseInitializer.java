@@ -27,6 +27,16 @@ public class DatabaseInitializer implements CommandLineRunner {
             log.info("Verifying database connection...");
             jdbcTemplate.execute("SELECT 1");
             
+            try {
+                jdbcTemplate.execute("SELECT 1 FROM tutorial_schema LIMIT 1");
+                log.info("tutorial_schema table exists");
+            } catch (Exception e) {
+                log.info("tutorial_schema table missing, creating and seeding...");
+                jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS tutorial_schema (id INT PRIMARY KEY AUTO_INCREMENT, level_id INT NOT NULL DEFAULT 0, schema_info TEXT NOT NULL)");
+                jdbcTemplate.execute("INSERT INTO tutorial_schema (level_id, schema_info) VALUES (0, 'Student Database Schema:\\n• Student (student_id INT PRIMARY KEY, name VARCHAR(50), age INT CHECK (age > 0), department VARCHAR(20), marks INT DEFAULT 0)')");
+                log.info("tutorial_schema table created and seeded!");
+            }
+            
             // Check if challenges table exists and has data
             boolean tablesExist = false;
             try {

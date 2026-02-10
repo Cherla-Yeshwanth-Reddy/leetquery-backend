@@ -43,8 +43,12 @@ public class LevelController {
     @GetMapping("/{levelId}/schema")
     public SchemaResponse getSchema(@PathVariable int levelId) {
         String sql = "SELECT schema_info FROM tutorial_schema WHERE level_id = ?";
-        String schemaInfo = jdbcTemplate.queryForObject(sql, new Object[]{levelId}, String.class);
-        return new SchemaResponse(schemaInfo != null ? schemaInfo : "No schema available");
+        try {
+            String schemaInfo = jdbcTemplate.queryForObject(sql, new Object[]{levelId}, String.class);
+            return new SchemaResponse(schemaInfo != null ? schemaInfo : "No schema available");
+        } catch (org.springframework.dao.EmptyResultDataAccessException e) {
+            return new SchemaResponse("No schema available for level " + levelId);
+        }
     }
     
     @PostMapping("/reset")
