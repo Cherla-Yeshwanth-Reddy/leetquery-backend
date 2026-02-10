@@ -62,16 +62,14 @@ public class QueryController {
      * Exception handler for validation errors
      */
     @ExceptionHandler(org.springframework.web.bind.MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidationException(
+    public ResponseEntity<QueryResponse> handleValidationException(
             org.springframework.web.bind.MethodArgumentNotValidException ex) {
         
         String errorMessage = ex.getBindingResult().getAllErrors().get(0).getDefaultMessage();
-        ErrorResponse errorResponse = ErrorResponse.builder()
+        QueryResponse errorResponse = QueryResponse.builder()
                 .success(false)
-                .error(errorMessage)
-                .sqlState(null)
-                .errorCode(null)
                 .queryType("VALIDATION_ERROR")
+                .message(errorMessage)
                 .build();
         
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);

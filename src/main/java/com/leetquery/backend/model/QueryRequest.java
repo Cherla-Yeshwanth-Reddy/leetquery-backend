@@ -10,6 +10,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class QueryRequest {
     
+    private Integer weekNumber;
+    private Long challengeId;
+    
     @NotBlank(message = "Query cannot be empty")
-    private String query;
+    private String userQuery;
+    
+    // For compatibility with any existing code that uses .getQuery()
+    public String getQuery() {
+        return userQuery;
+    }
 }
