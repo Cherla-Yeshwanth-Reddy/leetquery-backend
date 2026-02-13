@@ -29,6 +29,17 @@ public class AuthResponse {
     private UserInfo user;
     
     /**
+     * Constructor with username and email (convenience method)
+     */
+    public AuthResponse(String accessToken, String refreshToken, String tokenType, long expiresIn, String username, String email) {
+        this.accessToken = accessToken;
+        this.refreshToken = refreshToken;
+        this.tokenType = tokenType;
+        this.expiresIn = expiresIn;
+        this.user = new UserInfo(null, email, username, null, null);
+    }
+    
+    /**
      * User info included in auth response
      */
     @Data
