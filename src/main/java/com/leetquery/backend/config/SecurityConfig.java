@@ -1,6 +1,6 @@
 package com.leetquery.backend.config;
 
-import com.leetquery.backend.filter.JwtAuthenticationFilter;
+import com.leetquery.backend.security.JwtAuthenticationFilter;
 import com.leetquery.backend.security.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
