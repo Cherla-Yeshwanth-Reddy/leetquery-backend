@@ -171,4 +171,47 @@ public class JwtTokenProvider {
     public long getRefreshTokenExpirationMs() {
         return jwtRefreshExpirationMs;
     }
+    
+    // === Aliases and convenience methods ===
+    
+    /**
+     * Get expiration time (alias for getTokenExpirationMs)
+     */
+    public Long getExpirationMs() {
+        return jwtExpirationMs;
+    }
+    
+    /**
+     * Get username from token (alias for getUsernameFromJWT)
+     */
+    public String getUsernameFromToken(String token) {
+        return getUsernameFromJWT(token);
+    }
+    
+    /**
+     * Generate token from username (overload)
+     */
+    public String generateToken(String username) {
+        return generateTokenFromUsername(username);
+    }
+    
+    /**
+     * Validate refresh token
+     */
+    public boolean validateRefreshToken(String token) {
+        try {
+            Claims claims = Jwts.parser()
+                    .verifyWith(getSigningKey())
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+            
+            // Check if token is a refresh token
+            Object tokenType = claims.get("type");
+            return "refresh".equals(tokenType) && !isTokenExpired(token);
+        } catch (JwtException | IllegalArgumentException ex) {
+            logger.error("Invalid refresh token: {}", ex.getMessage());
+            return false;
+        }
+    }
 }
