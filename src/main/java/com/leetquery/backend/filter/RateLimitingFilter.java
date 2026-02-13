@@ -57,7 +57,7 @@ public class RateLimitingFilter extends OncePerRequestFilter {
         // Try to consume a token
         ConsumptionProbe probe = bucket.tryConsumeAndReturnRemaining(1);
         
-        if (probe.isSuccessful()) {
+        if (probe.isConsumed()) {
             // Token consumed successfully
             long tokensRemaining = probe.getRemainingTokens();
             response.addHeader("X-Rate-Limit-Remaining", String.valueOf(tokensRemaining));
@@ -65,16 +65,16 @@ public class RateLimitingFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
         } else {
             // Rate limit exceeded
-            long waitForRefill = TimeUnit.NANOSECONDS.toSeconds(probe.getRoundedSecondsToWait());
+            long waitForRefillSeconds = probe.getNanosToWaitForRefill() / 1_000_000_000;
             
-            response.addHeader("X-Rate-Limit-Retry-After-Seconds", String.valueOf(waitForRefill));
+            response.addHeader("X-Rate-Limit-Retry-After-Seconds", String.valueOf(waitForRefillSeconds));
             response.setStatus(HttpServletResponse.SC_TOO_MANY_REQUESTS);
             response.setContentType("application/json");
             
             String errorMessage = String.format(
                     "{\"error\":\"Rate limit exceeded\",\"retry_after_seconds\":%d,\"message\":\"Too many requests. Please try again after %d seconds\"}",
-                    waitForRefill,
-                    waitForRefill
+                    waitForRefillSeconds,
+                    waitForRefillSeconds
             );
             
             response.getWriter().write(errorMessage);
