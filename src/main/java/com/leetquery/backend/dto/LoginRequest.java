@@ -7,15 +7,15 @@ import lombok.NoArgsConstructor;
 
 /**
  * Login request DTO
+ * Accepts either email or username for flexible authentication
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class LoginRequest {
     
-    @NotBlank(message = "Email cannot be blank")
-    @Email(message = "Email must be valid")
-    private String email;
+    @NotBlank(message = "Username or email cannot be blank")
+    private String username;
     
     @NotBlank(message = "Password cannot be blank")
     @Size(min = 6, message = "Password must be at least 6 characters")
