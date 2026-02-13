@@ -68,7 +68,7 @@ public class RateLimitingFilter extends OncePerRequestFilter {
             long waitForRefillSeconds = probe.getNanosToWaitForRefill() / 1_000_000_000;
             
             response.addHeader("X-Rate-Limit-Retry-After-Seconds", String.valueOf(waitForRefillSeconds));
-            response.setStatus(HttpServletResponse.SC_TOO_MANY_REQUESTS);
+            response.setStatus(429);  // HTTP 429 Too Many Requests
             response.setContentType("application/json");
             
             String errorMessage = String.format(

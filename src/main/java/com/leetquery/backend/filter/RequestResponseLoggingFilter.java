@@ -40,7 +40,7 @@ public class RequestResponseLoggingFilter extends OncePerRequestFilter {
             logRequest(wrappedRequest, duration);
             logResponse(wrappedResponse, duration);
             
-            wrappedResponse.copyToResponse();
+            wrappedResponse.copyBodyToResponse();
         }
     }
 
