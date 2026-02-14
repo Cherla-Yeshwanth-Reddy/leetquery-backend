@@ -69,7 +69,7 @@ CREATE TABLE IF NOT EXISTS enrollments (
     student_id INT NOT NULL,
     course_id INT NOT NULL,
     semester VARCHAR(20),
-    year INT,
+    enrollment_year INT,
     grade VARCHAR(2),
     FOREIGN KEY (student_id) REFERENCES students(id),
     FOREIGN KEY (course_id) REFERENCES courses(id)
@@ -135,7 +135,7 @@ INSERT INTO courses (name, department_id, credits, instructor_id) VALUES
 -- ============================================
 -- Sample Data: enrollments
 -- ============================================
-INSERT INTO enrollments (student_id, course_id, semester, year, grade) VALUES
+INSERT INTO enrollments (student_id, course_id, semester, enrollment_year, grade) VALUES
 (1, 1, 'Fall', 2022, 'A'),
 (1, 2, 'Spring', 2023, 'A-'),
 (2, 1, 'Fall', 2021, 'B+'),
